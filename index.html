@@ -487,9 +487,8 @@ function lbHtml(lb){
   var h='<div class="lb">';
   var maxA=1;lb.ranked.forEach(function(d){if(d.avg>maxA)maxA=d.avg});
   lb.ranked.forEach(function(d){h+='<div class="lbr'+(d.dept===lb.mine?' me':'')+'"><div class="row1"><div><span class="rk">'+d.rank+'</span>'+esc(deptName(d.dept))+'</div><div>'+esc(tr('avg'))+' '+fmt(d.avg)+'</div></div><div class="row2"><div class="bg"><i style="width:'+Math.round(d.avg/maxA*100)+'%"></i></div><div>'+esc(tr('doneN',d.done,d.headcount))+'</div></div></div>'});
-  var small=false;
-  lb.others.forEach(function(d){if(d.headcount<5)small=true;h+='<div class="lbr'+(d.dept===lb.mine?' me':'')+'"><div class="row1"><div>'+esc(deptName(d.dept))+'</div><div style="font-weight:400;color:var(--mut);font-size:18px">'+esc(d.done?tr('doneN',d.done,d.headcount):tr('noDone'))+'</div></div></div>'});
-  h+='</div>'+(small?'<div style="margin-top:10px;font-size:18px;color:var(--mut)">'+esc(tr('smallNote'))+'</div>':'');
+  lb.others.forEach(function(d){h+='<div class="lbr'+(d.dept===lb.mine?' me':'')+'"><div class="row1"><div>'+esc(deptName(d.dept))+'</div><div style="font-weight:400;color:var(--mut);font-size:18px">'+esc(d.done?tr('doneN',d.done,d.headcount):tr('noDone'))+'</div></div></div>'});
+  h+='</div>';
   return h}
 function screenFinal(){
   S.render=screenFinal;var st=S.state;
@@ -498,7 +497,7 @@ function screenFinal(){
    +'<div class="panel stat" style="padding:0;border:0;background:none;margin-top:12px"><div><div class="c">'+esc(tr('total'))+'</div><div class="v">'+fmt(st.score)+'</div></div><div><div class="c">'+esc(tr('correctCnt'))+'</div><div class="v">'+st.correct+'<span style="font-size:20px;color:var(--mut)"> / 16</span></div></div></div>'
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('myBadges'))+'</div><div class="bgrid">'+[1,2,3,4].map(function(i){var m=L(i),l=st.levels[i-1];return '<div class="bgi'+(l.badge?'':' no')+'"><small>'+m.year+'</small>'+esc(l.badge?z(m.badge):tr('notGot'))+'</div>'}).join('')+'</div></div>'
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('fourLines'))+'</div>'+[1,2,3,4].map(function(i){return '<div class="take"><b class="serif">'+L(i).year+'</b><span>'+esc(z(L(i).remember))+'</span></div>'}).join('')+'</div>'
-   +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('lbT'))+'</div><div style="color:var(--mut);margin:4px 0 12px;font-size:18px">'+esc(tr('lbS'))+'</div><div id="lb">…</div></div>'
+   +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('lbT'))+'</div><div style="height:12px"></div><div id="lb">…</div></div>'
    +'<div class="foot" style="padding-top:14px">'+esc(tr('oneTime'))+'</div>'
    +'<div class="btns"><button class="btn sec" id="rv">'+esc(tr('review4'))+'</button><button class="sw" id="sw">'+esc(tr('switchId'))+'</button></div>'
    +'</div></div></div>',{bg:null});
