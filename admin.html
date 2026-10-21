@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>食安大作戰 後台</title>
+<style>
+:root{--g:#1B4D26;--g2:#2D7A3A;--bg:#F4F7F4;--ink:#1E2B22;--mut:#5C6B60;--line:#D5DDD6;--warn:#B3321F;--gold:#E3A21A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;font-size:16px;line-height:1.5}
+header{background:var(--g);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px}
+header h1{margin:0;font-size:20px}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:18px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+input{height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+button{height:40px;padding:0 16px;border:0;border-radius:8px;background:var(--g2);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+button.sm{height:30px;padding:0 10px;font-size:14px}
+button.warn{background:var(--warn)}
+button.ghost{background:#fff;color:var(--g);border:1px solid var(--g2)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.kpi b{display:block;font-size:28px;color:var(--g)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#EEF3EE;font-size:14px;color:var(--mut);position:sticky;top:0}
+.num{text-align:right;white-space:nowrap}
+.bar{height:8px;background:#E4EAE4;border-radius:4px;min-width:80px}.bar i{display:block;height:100%;background:var(--g2);border-radius:4px}
+.bad{color:var(--warn);font-weight:700}
+.scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.msg{margin-top:8px;font-size:14px}.ok{color:var(--g2)}.er{color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{background:#EEF3EE;border-radius:14px;padding:2px 10px;font-size:14px}
+#login{max-width:360px;margin:60px auto}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><h1>食安大作戰 後台</h1><span id="who" style="margin-left:auto;font-size:14px;opacity:.8"></span></header>
+<main>
+<div id="login" class="card">
+ <h2>輸入後台密碼</h2>
+ <label for="pw">密碼（在試算表「設定」分頁裡）</label>
+ <div class="row"><input id="pw" type="password" autocomplete="off" style="flex:1"><button id="go">進入</button></div>
+ <div id="lmsg" class="msg er"></div>
+</div>
+<div id="dash" class="hide">
+ <div id="dup" class="card hide" style="border-color:var(--warn);color:var(--warn);font-weight:700"></div>
+ <div class="kpi" id="kpi"></div>
+ <div class="card" style="margin-top:16px"><h2>活動時間</h2>
+  <div class="row"><div><label>開始（格式 2026-11-02 08:00，要含時間）</label><input id="st" placeholder="留空＝不限制"></div><div><label>結束（格式 2026-11-08 23:59，要含時間）</label><input id="en" placeholder="留空＝不限制"></div><button id="saveSet">儲存</button><button class="ghost" id="reload">重新整理資料</button></div>
+  <div id="smsg" class="msg"></div></div>
+ <div class="card"><h2>各部門完成情形</h2><table id="tDept"></table>
+  <div class="msg" style="color:var(--mut)">平均分只計算「已完成」的人。這個表只有後台看得到；玩家看到的排行榜，人數少於 5 人的部門不顯示平均分。</div></div>
+ <div class="card"><h2>每題答對率（由低到高，越低代表越難）</h2><div class="scroll"><table id="tQ"></table></div></div>
+ <div class="card"><h2>參加者進度</h2><div class="scroll"><table id="tP"></table></div>
+  <div id="pmsg" class="msg"></div></div>
+ <div class="card"><h2>還沒開始的工號（<span id="nsN"></span> 人）</h2><div class="chips" id="ns"></div>
+  <div class="msg" style="color:var(--mut)">只列工號與部門，沒有姓名。可以請各部門主管提醒。</div></div>
+</div>
+</main>
+<script src="./config.js"></script>
+<script>
+(function(){
+var API=(window.FSW_API_URL||'').trim(),PW='';
+var $=function(s){return document.querySelector(s)};
+function fid(k){k=String(k);return k.length===4?'8'+k:k}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function api(b){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+function load(){
+  return api({action:'adminStats',pw:PW}).then(function(j){
+    if(!j.ok){if(j.error==='AUTH'||j.error==='TOO_MANY')throw j.error;throw j.error||'ERR'}
+    render(j);return j})}
+function render(j){
+  $('#login').classList.add('hide');$('#dash').classList.remove('hide');
+  var t=j.totals;
+  var dp=$('#dup');if(j.dupes&&j.dupes.length){dp.classList.remove('hide');dp.textContent='⚠ 名單裡有重複的工號：'+j.dupes.map(fid).join('、')+'。重複的只算第一筆，請到試算表「名單」分頁修正。'}else dp.classList.add('hide');
+  $('#kpi').innerHTML='<div>名單人數<b>'+t.roster+'</b></div><div>已開始<b>'+t.started+'</b></div><div>已完成<b>'+t.done+'</b></div><div>完成率<b>'+Math.round(t.done*100/Math.max(1,t.roster))+'%</b></div><div>尚未開始<b>'+(t.roster-t.started)+'</b></div>';
+  $('#st').value=j.settings.start||'';$('#en').value=j.settings.end||'';
+  var h='<tr><th>部門</th><th class="num">人數</th><th class="num">已開始</th><th class="num">已完成</th><th>完成率</th><th class="num">平均分</th></tr>';
+  j.depts.slice().sort(function(a,b){return (b.done/b.headcount)-(a.done/a.headcount)}).forEach(function(d){var p=Math.round(d.done*100/d.headcount);h+='<tr><td>'+esc(d.dept)+'</td><td class="num">'+d.headcount+'</td><td class="num">'+d.started+'</td><td class="num">'+d.done+'</td><td><div class="bar"><i style="width:'+p+'%"></i></div>'+p+'%</td><td class="num">'+(d.avg==null?'—':d.avg.toLocaleString())+'</td></tr>'});
+  $('#tDept').innerHTML=h;
+  var q='<tr><th>關</th><th>題目</th><th class="num">作答</th><th class="num">答對</th><th class="num">逾時</th><th class="num">答對率</th></tr>';
+  j.questions.slice().sort(function(a,b){return (a.rate==null?999:a.rate)-(b.rate==null?999:b.rate)}).forEach(function(x){q+='<tr><td>'+x.year+'</td><td>'+esc(x.q)+'</td><td class="num">'+x.asked+'</td><td class="num">'+x.correct+'</td><td class="num">'+x.timeout+'</td><td class="num'+(x.rate!=null&&x.rate<50?' bad':'')+'">'+(x.rate==null?'—':x.rate+'%')+'</td></tr>'});
+  $('#tQ').innerHTML=q;
+  var p='<tr><th>工號</th><th>部門</th><th>狀態</th><th class="num">完成關數</th><th class="num">總分</th><th class="num">答對</th><th>開始</th><th>完成</th><th></th></tr>';
+  j.players.forEach(function(x){p+='<tr><td>'+esc(fid(x.key))+'</td><td>'+esc(x.dept)+'</td><td>'+esc(x.status)+'</td><td class="num">'+x.levelsDone+'/4</td><td class="num">'+x.score.toLocaleString()+'</td><td class="num">'+x.correct+'/16</td><td>'+esc(x.started)+'</td><td>'+esc(x.finished)+'</td><td><button class="sm warn" data-r="'+esc(x.key)+'">重玩</button></td></tr>'});
+  $('#tP').innerHTML=p;
+  $('#nsN').textContent=j.notStarted.length;
+  $('#ns').innerHTML=j.notStarted.map(function(x){return '<span>'+esc(fid(x.key))+' '+esc(x.dept)+'</span>'}).join('');
+  document.querySelectorAll('[data-r]').forEach(function(b){b.onclick=function(){var k=b.getAttribute('data-r');if(!confirm('讓工號 '+k+' 可以重新玩一次？（他目前的進度與分數會清掉）'))return;api({action:'adminReset',pw:PW,id:k}).then(function(r){$('#pmsg').textContent=r.ok?'已重設 '+k:'失敗：'+r.error;$('#pmsg').className='msg '+(r.ok?'ok':'er');if(r.ok)load()})}});
+}
+function enter(){PW=$('#pw').value.trim();if(!PW)return;if(!API){$('#lmsg').textContent='尚未設定 config.js';return}
+  $('#lmsg').textContent='讀取中…';load().then(function(){try{sessionStorage.setItem('fsw_pw',PW)}catch(e){}}).catch(function(e){$('#lmsg').textContent=e==='AUTH'?'密碼不對':e==='TOO_MANY'?'錯太多次，已暫時鎖住，請 10 分鐘後再試':'連線失敗，請稍後再試'})}
+$('#go').onclick=enter;$('#pw').onkeydown=function(e){if(e.key==='Enter')enter()};
+$('#reload').onclick=function(){load()};
+$('#saveSet').onclick=function(){api({action:'adminSet',pw:PW,start:$('#st').value.trim(),end:$('#en').value.trim()}).then(function(r){var m='已儲存（已統一格式：'+(r.start||'不限制')+' ～ '+(r.end||'不限制')+'）';if(!r.ok){m=r.error==='BAD_DATE'?(r.field==='start'?'開始':'結束')+'時間的格式不對，請用 2026-11-02 08:00 這種格式':r.error==='BAD_RANGE'?'結束時間必須晚於開始時間':r.error==='TOO_MANY'?'錯誤次數太多，請稍後再試':'失敗：'+r.error}
+    $('#smsg').textContent=m;$('#smsg').className='msg '+(r.ok?'ok':'er');if(r.ok){$('#st').value=r.start||'';$('#en').value=r.end||''}}).catch(function(){$('#smsg').textContent='連線失敗，請稍後再試';$('#smsg').className='msg er'})};
+try{var sp=sessionStorage.getItem('fsw_pw');if(sp){$('#pw').value=sp;enter()}}catch(e){}
+})();
+</script>
+</body>
+</html>
