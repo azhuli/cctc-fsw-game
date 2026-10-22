@@ -54,7 +54,7 @@ th{background:#EEF3EE;font-size:14px;color:var(--mut);position:sticky;top:0}
   <div id="smsg" class="msg"></div></div>
  <div class="card"><h2>各部門完成情形</h2><table id="tDept"></table>
   <div class="msg" style="color:var(--mut)">平均分只計算「已完成」的人。這個表只有後台看得到；玩家看到的排行榜，人數少於 5 人的部門不顯示平均分。</div></div>
- <div class="card"><h2>每題答對率（由低到高，越低代表越難）</h2><div class="scroll"><table id="tQ"></table></div></div>
+ <div class="card"><h2>每題答對率（由低到高，越低代表越難）；第 3 關另顯示平均看了幾條線索</h2><div class="scroll"><table id="tQ"></table></div></div>
  <div class="card"><h2>參加者進度</h2><div class="scroll"><table id="tP"></table></div>
   <div id="pmsg" class="msg"></div></div>
  <div class="card"><h2>還沒開始的工號（<span id="nsN"></span> 人）</h2><div class="chips" id="ns"></div>
@@ -82,8 +82,8 @@ function render(j){
   var h='<tr><th>部門</th><th class="num">人數</th><th class="num">已開始</th><th class="num">已完成</th><th>完成率</th><th class="num">平均分</th></tr>';
   j.depts.slice().sort(function(a,b){return (b.done/b.headcount)-(a.done/a.headcount)}).forEach(function(d){var p=Math.round(d.done*100/d.headcount);h+='<tr><td>'+esc(d.dept)+'</td><td class="num">'+d.headcount+'</td><td class="num">'+d.started+'</td><td class="num">'+d.done+'</td><td><div class="bar"><i style="width:'+p+'%"></i></div>'+p+'%</td><td class="num">'+(d.avg==null?'—':d.avg.toLocaleString())+'</td></tr>'});
   $('#tDept').innerHTML=h;
-  var q='<tr><th>關</th><th>題目</th><th class="num">作答</th><th class="num">答對</th><th class="num">逾時</th><th class="num">答對率</th></tr>';
-  j.questions.slice().sort(function(a,b){return (a.rate==null?999:a.rate)-(b.rate==null?999:b.rate)}).forEach(function(x){q+='<tr><td>'+x.year+'</td><td>'+esc(x.q)+'</td><td class="num">'+x.asked+'</td><td class="num">'+x.correct+'</td><td class="num">'+x.timeout+'</td><td class="num'+(x.rate!=null&&x.rate<50?' bad':'')+'">'+(x.rate==null?'—':x.rate+'%')+'</td></tr>'});
+  var q='<tr><th>關</th><th>題目</th><th class="num">作答</th><th class="num">答對</th><th class="num">逾時</th><th class="num">答對率</th><th class="num">平均線索數</th></tr>';
+  j.questions.slice().sort(function(a,b){return (a.rate==null?999:a.rate)-(b.rate==null?999:b.rate)}).forEach(function(x){q+='<tr><td>'+x.year+'</td><td>'+esc(x.q)+'</td><td class="num">'+x.asked+'</td><td class="num">'+x.correct+'</td><td class="num">'+x.timeout+'</td><td class="num'+(x.rate!=null&&x.rate<50?' bad':'')+'">'+(x.rate==null?'—':x.rate+'%')+'</td><td class="num">'+(x.clueAvg==null?'':x.clueAvg+' / 3')+'</td></tr>'});
   $('#tQ').innerHTML=q;
   var p='<tr><th>工號</th><th>部門</th><th>狀態</th><th class="num">完成關數</th><th class="num">總分</th><th class="num">答對</th><th>開始</th><th>完成</th><th></th></tr>';
   j.players.forEach(function(x){p+='<tr><td>'+esc(fid(x.key))+'</td><td>'+esc(x.dept)+'</td><td>'+esc(x.status)+'</td><td class="num">'+x.levelsDone+'/4</td><td class="num">'+x.score.toLocaleString()+'</td><td class="num">'+x.correct+'/16</td><td>'+esc(x.started)+'</td><td>'+esc(x.finished)+'</td><td><button class="sm warn" data-r="'+esc(x.key)+'">重玩</button></td></tr>'});
