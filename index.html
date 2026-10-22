@@ -144,6 +144,13 @@ input.id{width:100%;height:60px;font-size:24px;padding:0 16px;border:2px solid v
 .npc.jump{animation:jump .9s ease-out 1,float 3.2s ease-in-out .9s infinite}
 .npc.sway{animation:sway .9s ease-in-out 1,float 3.2s ease-in-out .9s infinite}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+#egg{position:fixed;inset:0;z-index:60;background:rgba(5,12,8,.8);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .25s ease-out both}
+#egg .eggc{max-width:440px;width:100%;max-height:100%;overflow:auto;background:var(--dlg);border:2px solid var(--gold);border-radius:18px;padding:18px 20px;text-align:center}
+#egg .eggc img{display:block;width:110px;height:auto;margin:0 auto 4px}
+#egg .eh{font-weight:900;font-size:22px;color:var(--gold)}
+#egg ul{list-style:none;margin:14px 0 2px;padding:0;display:flex;flex-direction:column;gap:12px}
+#egg li{display:flex;align-items:center;justify-content:center;gap:10px;font-size:24px;font-weight:900;line-height:1.3}
+#egg li svg{flex-shrink:0}
 .wrap{animation:fade .4s ease-out both}
 .dlg{animation:pop .42s cubic-bezier(.2,1.2,.4,1) both}
 .cards>div{animation:rise .45s ease-out both}
@@ -390,7 +397,7 @@ function npc(img,cls){return '<img class="npc '+(cls||'')+'" src="'+NPCSRC[img]+
 function dlg(text,extra,tri){return '<div class="dlg"><div class="nm serif">'+esc(NPC_NAME[S.lang])+'</div><p>'+esc(text)+'</p>'+(extra||'')+(tri?IC.tri:'')+'</div>'}
 function show(html,opts){opts=opts||{};document.querySelectorAll('.cfx').forEach(function(c){if(c.parentNode)c.parentNode.removeChild(c)});scene(opts.bg);app.className=S.noAnim?'na':'';app.innerHTML=html;window.scrollTo(0,0);
   var lb=app.querySelectorAll('.lang button');for(var i=0;i<lb.length;i++)lb[i].onclick=function(){setLang(this.getAttribute('data-l'))}}
-function setLang(l){if(l===S.lang)return;S.lang=l;try{localStorage.setItem('fsw_lang',l)}catch(e){}document.documentElement.lang=l==='zh'?'zh-TW':'vi';if(S.render){S.noAnim=true;try{S.render(true)}finally{S.noAnim=false}}}
+function setLang(l){if(l===S.lang)return;S.lang=l;try{localStorage.setItem('fsw_lang',l)}catch(e){}document.documentElement.lang=l==='zh'?'zh-TW':'vi';var eg=document.getElementById('egg');if(eg){eg.querySelector('.eggc').innerHTML=policyInner();document.getElementById('eggx').onclick=closePolicy}if(S.render){S.noAnim=true;try{S.render(true)}finally{S.noAnim=false}}}
 function busy(on){$('#busy').style.display=on?'flex':'none'}
 var toastT;function toast(msg){var t=$('#toast');t.textContent=msg;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(function(){t.style.display='none'},4500)}
 
@@ -493,6 +500,15 @@ function screenStoryEnd(){
   $('#again').onclick=function(){S.storyPage=0;screenStory()};
   $('#go').onclick=function(){if(S.state.levels[S.level-1].status==='done'){screenMap()}else loadQuestion()};
 }
+var POLICY={t:['食品安全政策','Chính sách an toàn thực phẩm'],l:[['確保食安無疑','追求品質卓越','落實企業永續'],['Nhằm đảm bảo an toàn thực phẩm không vấn đề','Theo đuổi chất lượng xuất sắc','Thực hiện sự bền vững của doanh nghiệp']],c:['關閉','Đóng']};
+function policyInner(){var k=S.lang==='zh'?0:1,li='';POLICY.l[k].forEach(function(t){li+='<li>'+IC.check('#7FBF8B',24)+'<span>'+esc(t)+'</span></li>'});
+  return '<img src="'+NPCSRC.happy+'" alt=""><div class="eh">'+esc(POLICY.t[k])+'</div><ul>'+li+'</ul><button type="button" class="btn" id="eggx" style="margin-top:16px">'+esc(POLICY.c[k])+'</button>'}
+function closePolicy(){var e=document.getElementById('egg');if(e&&e.parentNode)e.parentNode.removeChild(e);document.removeEventListener('keydown',eggKey)}
+function eggKey(ev){if(ev.key==='Escape')closePolicy()}
+function showPolicy(){if(document.getElementById('egg'))return;var e=document.createElement('div');e.id='egg';e.setAttribute('role','dialog');e.setAttribute('aria-modal','true');e.innerHTML='<div class="eggc">'+policyInner()+'</div>';
+  e.onclick=function(ev){if(ev.target===e)closePolicy()};document.body.appendChild(e);var b=document.getElementById('eggx');b.onclick=closePolicy;b.focus();document.addEventListener('keydown',eggKey)}
+var eggN=0,eggT=0;
+document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('npc'))return;var now=Date.now();if(now-eggT>1500)eggN=0;eggT=now;eggN++;if(eggN>=5){eggN=0;showPolicy()}},false);
 var MODE={2:['本關玩法：線索偵探。先看 1 條線索，需要時再多看；用的線索越少，加分越多。','Cách chơi: Thám tử manh mối. Xem 1 manh mối trước, cần thì xem thêm; dùng càng ít manh mối, điểm cộng càng cao.'],
  4:['本關前 2 題是「巡檢卡片」：看圖和文字，找出最需要處理的那一張。後 2 題是一般題。','Màn này 2 câu đầu là "thẻ kiểm tra": xem hình và chữ, chọn thẻ cần xử lý nhất. 2 câu sau là câu thông thường.']};
 function preloadCards(){if(S.pl)return;S.pl=1;['a','b','c'].forEach(function(g){for(var n=1;n<=4;n++){var im=new Image();im.src='./l4-'+g+n+'.webp'}})}
