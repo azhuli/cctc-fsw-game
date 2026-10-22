@@ -257,8 +257,8 @@ var T={
  yesCont:{zh:'是，繼續闖關',vi:'Đúng, tiếp tục'},
  notMe:{zh:'不是我，重新輸入',vi:'Không phải tôi, nhập lại'},
  rulesT:{zh:'遊戲規則',vi:'Luật chơi'},
- rules:{zh:['共 4 關，每關 4 題：情境題 2 題、一般題 2 題。','每關 3 個盾牌，答錯扣 1 個。用完不會被淘汰，剩下的題目改成看解析。','每題限時 2 分鐘，時間到算答錯。','答得快、連續答對，分數越高。'],
-        vi:['Có 4 màn, mỗi màn 4 câu: 2 câu tình huống và 2 câu hỏi chung.','Mỗi màn có 3 khiên, trả lời sai mất 1 khiên. Hết khiên không bị loại, các câu còn lại chuyển sang xem giải thích.','Mỗi câu giới hạn 2 phút, hết giờ tính là sai.','Trả lời nhanh và đúng liên tiếp sẽ được điểm cao hơn.']},
+ rules:{zh:['共 4 關，每關 4 題：情境題 2 題、一般題 2 題。','每關 3 個盾牌，答錯扣 1 個。用完不會被淘汰，剩下的題目改成看解析。','每題限時 2 分鐘，時間到算答錯。','答得快、連續答對，分數越高。每關答對 3 題以上，可以拿到該關稱號。'],
+        vi:['Có 4 màn, mỗi màn 4 câu: 2 câu tình huống và 2 câu hỏi chung.','Mỗi màn có 3 khiên, trả lời sai mất 1 khiên. Hết khiên không bị loại, các câu còn lại chuyển sang xem giải thích.','Mỗi câu giới hạn 2 phút, hết giờ tính là sai.','Trả lời nhanh và đúng liên tiếp sẽ được điểm cao hơn. Mỗi màn trả lời đúng từ 3 câu trở lên sẽ nhận được danh hiệu của màn đó.']},
  pickCase:{zh:'選擇案件',vi:'Chọn vụ việc'},
  score:{zh:'得分',vi:'Điểm'},
  mapNpc0:{zh:'「準備好了嗎？第一個案件在等你。」',vi:'“Sẵn sàng chưa? Vụ việc đầu tiên đang chờ bạn.”'},
@@ -301,7 +301,8 @@ var T={
  clearT:{zh:'過關了',vi:'Qua màn'},clearT2:{zh:'本關結案',vi:'Màn này khép lại'},
  clearHd:{zh:function(n){return '第 '+n+' 關 · 結案'},vi:function(n){return 'Màn '+n+' · Kết án'}},
  clearNpc:{zh:function(b){return '「這關結案！你拿到了『'+b+'』的稱號。」'},vi:function(b){return '“Màn này đã khép lại! Bạn nhận được danh hiệu “'+b+'”.”'}},
- clearNpc2:{zh:'「這關結案了。盾牌用完所以沒拿到稱號，下一關再拿！」',vi:'“Màn này đã khép lại. Bạn hết khiên nên chưa nhận được danh hiệu, màn sau cố gắng nhé!”'},
+ clearNpc2a:{zh:'「差一點！再答對 1 題就拿到稱號了。」',vi:'“Suýt nữa! Chỉ cần đúng thêm 1 câu là nhận được danh hiệu.”'},
+ clearNpc2b:{zh:'「這關比較難，一起看一下重點吧。」',vi:'“Màn này hơi khó, cùng xem lại điểm chính nhé.”'},
  lvScore:{zh:'本關得分',vi:'Điểm màn này'},gotBadge:{zh:'獲得稱號',vi:'Danh hiệu nhận được'},
  toNext:{zh:'前往下一關',vi:'Sang màn tiếp theo'},toList:{zh:'回到案件列表',vi:'Về danh sách vụ việc'},toFinal:{zh:'看總成績',vi:'Xem tổng thành tích'},
  allT1:{zh:'全部結案',vi:'Đã kết án tất cả'},allT2:{zh:'四個案件，全部完成',vi:'Hoàn thành cả bốn vụ việc'},
@@ -418,7 +419,7 @@ function cardHtml(i,st,review){
     return '<div class="card">'+head+'<div class="chip" style="background:var(--ok);color:#fff">'+IC.check('#fff',18)+esc(tr('closed'))+'</div></div><div style="margin-top:6px;color:var(--mut)">'+esc(tr('theme')+z(m.theme))+'</div>'
     +'<div style="margin-top:8px;display:flex;align-items:center;gap:6px">'+shieldRow(lv.shields,3,26)+'<span style="margin-left:8px;font-weight:700">'+esc(tr('score'))+' '+fmt(lv.score)+'</span></div>'
     +'<div style="margin-top:8px">'+starRow(lv.correct,24,false)+'</div>'
-    +(lv.badge?'<div class="badge" style="margin-top:10px">'+IC.medal+esc(z(m.badge))+'</div>':'')
+    +(lv.badge?'<div class="badge" style="margin-top:10px">'+IC.medal+esc(z(m.badge))+'</div>':'<div class="badge" style="margin-top:10px;border:2px dashed #4A6552;background:transparent;color:#9FB2A4">'+medalIc(false,22)+esc(z(m.badge))+'</div>')
     +'<button class="btn sec" data-story="'+i+'" style="margin-top:12px;min-height:52px;font-size:20px">'+esc(tr('reStory'))+'</button></div>'}
   var prog=lv.idx>0;
   return '<div class="card next">'+head+'<div class="chip" style="background:var(--gold);color:#1E2B22">'+esc(prog?tr('playing'):tr('nextLv'))+'</div></div><div style="margin-top:6px;color:var(--mut)">'+esc(tr('theme')+z(m.theme))+'</div>'
@@ -477,7 +478,7 @@ function loadQuestion(){
     if(j.timedOut){S.q=null;S.res=j.result;S.lastQ=j.result.q||null;afterAnswer(j.result,true);return}
     S.q=j.q;S.sel=-1;S.review=!!j.review;
     if(j.review){S.rv={ci:j.correctIndex,eZh:j.eZh,eVi:j.eVi};screenReview();return}
-    S.total=j.total||QTIME;S.t0=Date.now();S.rem0=j.remaining;S.shields=j.shields;S.lvScore=j.score;
+    S.total=j.total||QTIME;S.t0=Date.now();S.rem0=j.remaining;S.shields=j.shields;S.lvScore=j.score;S.lvCorrect=j.correct||0;
     screenQuestion();startTimer();
   });
 }
@@ -489,7 +490,7 @@ function tick(){
   t.className=rem<=10&&rem>0?'low':'';redz(rem<=0?0:rem<=3?2:rem<=10?1:0);b.style.width=(rem/S.total*100)+'%';b.style.background=rem<=10?'#FF8A75':rem<=30?'#E3A21A':'#7FBF8B';
   if(rem<=0){stopTimer();submit(null)}
 }
-function qHdr(){var m=L(S.level);return hdrTitle(esc(tr('qN',S.q.i+1))+' <span style="color:var(--mut);font-size:20px">/ '+S.q.n+'</span>',m.year+' '+z(m.title),'<div style="display:flex;gap:4px" aria-label="shield">'+shieldRow(S.shields,3,28)+'</div>','<div class="tm"><div class="bar"><i id="tbar" style="width:100%"></i></div><div id="ttxt" role="timer">2:00</div></div>')}
+function qHdr(){var m=L(S.level);return hdrTitle(esc(tr('qN',S.q.i+1))+' <span style="color:var(--mut);font-size:20px">/ '+S.q.n+'</span>',m.year+' '+z(m.title),'<div style="display:flex;gap:4px" aria-label="shield">'+shieldRow(S.shields,3,28)+'</div>','<div class="tm">'+starRow(S.lvCorrect||0,16,false)+'<div class="bar"><i id="tbar" style="width:100%"></i></div><div id="ttxt" role="timer">2:00</div></div>')}
 function tagHtml(q){return '<span class="tag">'+esc(q.type==='s'?tr('sitTag',S.lang==='zh'?q.roleZh:(q.labelVi||q.roleVi)):tr('genTag'))+'</span>'}
 function screenQuestion(){
   S.render=function(){screenQuestion();tick()};
@@ -566,17 +567,19 @@ function screenReview(){
 }
 function screenClear(sm){
   S.summary=sm;S.render=function(){screenClear(sm)};var m=L(S.level),all=S.state.levels.every(function(l){return l.status==='done'});
+  var remBox='<div class="remember"><b>'+esc(tr('remember'))+'</b><div class="serif">'+esc(z(m.remember))+'</div></div>';
   show(hdrTitle(esc(tr('clearHd',S.level)),m.year+' '+z(m.title))+'<div class="wrap"><div class="body dsk"><div class="npcCol">'+npc('celebrate',sm.badge?'jump':'')+'<div class="beside"><div style="font-weight:900;font-size:36px;line-height:1.1" class="serif">'+esc(sm.badge?tr('clearT'):tr('clearT2'))+'</div></div></div><div class="mainCol">'
-   +dlg(sm.badge?tr('clearNpc',z(m.badge)):tr('clearNpc2'))
+   +dlg(sm.badge?tr('clearNpc',z(m.badge)):(sm.correct>=2?tr('clearNpc2a'):tr('clearNpc2b')))
    +'<div class="starsRow">'+starRow(sm.correct,46,true)+'</div>'
+   +(sm.badge?'':remBox)
    +'<div class="panel stat" style="padding:0;border:0;background:none;margin-top:12px"><div><div class="v">'+sm.correct+'<span style="font-size:20px;color:var(--mut)"> / '+sm.total+'</span></div><div class="c">'+esc(tr('correctCnt'))+'</div></div>'
    +'<div><div style="display:flex;justify-content:center;gap:2px">'+shieldRow(sm.shields,3,26)+'</div><div class="c">'+esc(tr('shieldsLbl',sm.shields))+'</div></div>'
    +'<div><div class="v" id="cu1">+'+fmt(sm.score)+'</div><div class="c">'+esc(tr('lvScore'))+'</div></div></div>'
-   +(sm.badge?'<div class="panel" style="display:flex;align-items:center;gap:12px;border-color:var(--gold);background:rgba(227,162,26,.18)">'+'<span class="litpop">'+medalIc(true,46)+'</span>'+'<div><div style="font-size:18px;color:#F7D58A">'+esc(tr('gotBadge'))+'</div><div class="serif" style="font-weight:900;font-size:26px;color:#FFE9A8">'+esc(z(m.badge))+'</div></div></div>':'')
-   +'<div class="remember"><b>'+esc(tr('remember'))+'</b><div class="serif">'+esc(z(m.remember))+'</div></div>'
+   +(sm.badge?'<div class="panel" style="display:flex;align-items:center;gap:12px;border-color:var(--gold);background:rgba(227,162,26,.18)">'+'<span class="litpop">'+medalIc(true,46)+'</span>'+'<div><div style="font-size:18px;color:#F7D58A">'+esc(tr('gotBadge'))+'</div><div class="serif" style="font-weight:900;font-size:26px;color:#FFE9A8">'+esc(z(m.badge))+'</div></div></div>':'<div class="panel" style="display:flex;align-items:center;gap:12px;border:2px dashed #4A6552;background:transparent">'+medalIc(false,46)+'<div><div style="font-size:18px;color:#9FB2A4">'+esc(tr('notGot'))+'</div><div class="serif" style="font-weight:900;font-size:26px;color:#9FB2A4">'+esc(z(m.badge))+'</div></div></div>')
+   +(sm.badge?remBox:'')
    +'<div class="btns">'+(all?'<button class="btn" id="fin">'+esc(tr('toFinal'))+'</button>':(S.level<4?'<button class="btn" id="nxl">'+esc(tr('toNext'))+'</button>':''))+'<button class="btn sec" id="lst">'+esc(tr('toList'))+'</button></div>'
    +'</div></div></div>',{bg:null});
-  countUp($('#cu1'),sm.score,'+');if(sm.badge)burst(70);
+  countUp($('#cu1'),sm.score,'+');if(sm.badge)burst(70);else document.querySelectorAll('.cfx').forEach(function(c){c.parentNode.removeChild(c)});
   var a=$('#fin');if(a)a.onclick=function(){screenFinal()};
   var b=$('#nxl');if(b)b.onclick=function(){S.level++;startStory(S.level)};
   $('#lst').onclick=function(){screenMap()};
