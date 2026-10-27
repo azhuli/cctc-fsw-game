@@ -508,7 +508,7 @@ function eggKey(ev){if(ev.key==='Escape')closePolicy()}
 function showPolicy(){if(document.getElementById('egg'))return;var e=document.createElement('div');e.id='egg';e.setAttribute('role','dialog');e.setAttribute('aria-modal','true');e.innerHTML='<div class="eggc">'+policyInner()+'</div>';
   e.onclick=function(ev){if(ev.target===e)closePolicy()};document.body.appendChild(e);var b=document.getElementById('eggx');b.onclick=closePolicy;b.focus();document.addEventListener('keydown',eggKey)}
 var eggN=0,eggT=0;
-document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('npc'))return;var now=Date.now();if(now-eggT>1500)eggN=0;eggT=now;eggN++;if(eggN>=5){eggN=0;showPolicy()}},false);
+document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('npc'))return;var now=Date.now();if(now-eggT>1500)eggN=0;eggT=now;eggN++;if(eggN>=3){eggN=0;showPolicy()}},false);
 var MODE={2:['本關玩法：線索偵探。先看 1 條線索，需要時再多看；用的線索越少，加分越多。','Cách chơi: Thám tử manh mối. Xem 1 manh mối trước, cần thì xem thêm; dùng càng ít manh mối, điểm cộng càng cao.'],
  4:['本關前 2 題是「巡檢卡片」：看圖和文字，找出最需要處理的那一張。後 2 題是一般題。','Màn này 2 câu đầu là "thẻ kiểm tra": xem hình và chữ, chọn thẻ cần xử lý nhất. 2 câu sau là câu thông thường.']};
 function preloadCards(){if(S.pl)return;S.pl=1;['a','b','c'].forEach(function(g){for(var n=1;n<=4;n++){var im=new Image();im.src='./l4-'+g+n+'.webp'}})}
