@@ -40,6 +40,7 @@ body.scene #bgB,body.scene #bgC{display:block}
 .lang{display:flex;border:2px solid rgba(255,255,255,.55);border-radius:22px;overflow:hidden}
 .lang button{border:0;padding:6px 14px;background:transparent;color:#fff;font-weight:700;font-size:18px}
 .lang button.on{background:#fff;color:#1B4D26}
+@media (min-width:360px) and (max-width:480px){.hdr .brand{white-space:nowrap;font-size:21px}html[lang="vi"] .hdr .brand{white-space:normal;font-size:20px;line-height:1.15}}
 @media (max-width:480px){.sndb{width:34px;height:34px}.sndb svg{width:19px;height:19px}.lang button{padding:5px 10px;font-size:16px}.hdr .r{gap:8px}.hdr .h-t{white-space:nowrap}.hdr .h-s{font-size:16px}.hdr .r > div svg{width:22px;height:22px}}
 .wrap{width:100%;max-width:520px;margin:0 auto;flex:1;display:flex;flex-direction:column;padding-bottom:20px}
 .body{display:flex;flex-direction:column}
@@ -161,6 +162,16 @@ input.id{width:100%;height:60px;font-size:24px;padding:0 16px;border:2px solid v
 .fullc .beside{text-align:center}
 @media (max-width:899px){.npcCol.fullc{flex-direction:column;align-items:center;gap:4px}.fullc .npc{width:250px;height:212px}}
 .trophy{vertical-align:-6px;filter:drop-shadow(0 0 6px rgba(247,213,138,.7))}
+.fbp .fq{margin-top:14px;font-weight:700;font-size:20px}
+.fbp .fstars{display:flex;gap:4px;margin-top:6px}
+.fbp .fstars button{background:transparent;border:0;padding:4px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px}
+.fbp .fdiff{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.fbp .fdiff button{border:2px solid #4A6552;border-radius:22px;padding:8px 16px;min-height:44px;font-size:19px;background:transparent;color:inherit}
+.fbp .fdiff button.on{border-color:#F7D58A;background:rgba(227,162,26,.22);font-weight:700;color:#FFE9A8}
+.fbp textarea{box-sizing:border-box;width:100%;margin-top:8px;border:2px solid #4A6552;border-radius:12px;padding:12px;min-height:76px;font:inherit;font-size:19px;background:rgba(0,0,0,.25);color:inherit;resize:vertical}
+.fbp textarea:focus-visible,.fbp button:focus-visible{outline:3px solid #F7D58A;outline-offset:2px}
+.fbp .fcnt{text-align:right;color:var(--mut);font-size:15px;margin-top:2px}
+.fbp .fsub{color:var(--mut);font-size:18px;margin-top:2px}
 .knchip:active{transform:scale(.97)}
 @keyframes knp{0%,100%{box-shadow:0 0 0 0 rgba(247,213,138,.0)}50%{box-shadow:0 0 0 6px rgba(247,213,138,.22)}}
 .wrap{animation:fade .4s ease-out both}
@@ -226,7 +237,7 @@ body.scene #bgB{animation:kb 22s ease-in-out infinite alternate}
   .dlg{padding:10px 14px}.dlg p{font-size:19px;line-height:1.5}
   .opt{min-height:52px;padding:6px 12px;font-size:18px}
 }
-@media (max-width:359px){.hdr .r > div{gap:2px!important}.hdr .r > div svg{width:16px;height:16px}.sndb{width:30px;height:30px}.sndb svg{width:17px;height:17px}.hdr.hq .h-s{display:none}.opts.scene{grid-template-columns:1fr}.opt.card2{flex-direction:row;align-items:center}.opt.card2 img{width:112px;flex-shrink:0}.opt.card2 .cl{flex:1;font-size:16px}.lang button{padding:6px 7px;font-size:15px}.h-t{font-size:20px}.brand{font-size:20px}}
+@media (max-width:359px){.hdr:not(.hq) .sndb{display:none}.hdr .r > div{gap:2px!important}.hdr .r > div svg{width:16px;height:16px}.sndb{width:30px;height:30px}.sndb svg{width:17px;height:17px}.hdr.hq .h-s{display:none}.opts.scene{grid-template-columns:1fr}.opt.card2{flex-direction:row;align-items:center}.opt.card2 img{width:112px;flex-shrink:0}.opt.card2 .cl{flex:1;font-size:16px}.lang button{padding:6px 7px;font-size:15px}.h-t{font-size:20px}.brand{font-size:20px}}
 .sw{margin:4px auto 0;background:transparent;border:0;color:var(--mut);text-decoration:underline;font-size:18px;min-height:48px;padding:0 12px}
 @media (min-width:900px){
   .hdr .tm{max-width:1088px;margin:0 auto}
@@ -545,6 +556,10 @@ var KN=[null,['塑化劑事件是不肖業者用工業用的 DEHP，取代棕櫚
  ['凱氏定氮法測的是「氮」，不是「蛋白質」。三聚氰胺的含氮量約 66%，所以摻進去能讓蛋白質數值看起來變高。','Phương pháp Kjeldahl đo hàm lượng "nitơ" chứ không đo trực tiếp "protein". Melamine chứa khoảng 66% nitơ nên khi bị thêm vào sẽ làm kết quả protein cao giả tạo.'],
  ['毒澱粉事件是業者為了讓口感更 Q 彈，違法添加工業用的順丁烯二酸酐。工業級原料不能用在食品，「用途」也要查清楚。','Vụ tinh bột độc xảy ra khi một số cơ sở vi phạm đã thêm anhydrit maleic công nghiệp để thực phẩm dai và giòn hơn. Nguyên liệu công nghiệp không được dùng cho thực phẩm, và cần kiểm tra rõ mục đích sử dụng.'],
  ['亞培事件中，工廠環境檢出阪崎腸桿菌。環境監測的目的，就是在產品出問題之前，先從環境發現風險。','Trong vụ Abbott, vi khuẩn Cronobacter sakazakii được phát hiện trong môi trường nhà máy. Giám sát môi trường giúp phát hiện rủi ro trước khi sản phẩm gặp vấn đề.']];
+var FBS={t:['給阿安一點回饋','Góp ý cho Đội trưởng An'],s:['選填，匿名，只記錄部門。30 秒就能完成','Không bắt buộc, ẩn danh, chỉ ghi nhận bộ phận. Chỉ mất khoảng 30 giây'],
+ q1:['好不好玩？','Bạn thấy trò chơi có vui không?'],q2:['難度如何？','Độ khó thế nào?'],d:[['太簡單','剛好','太難'],['Quá dễ','Vừa phải','Quá khó']],
+ q3:['想對阿安說的話（可不填）','Điều muốn nói với Đội trưởng An (không bắt buộc)'],ph:['例如：哪一關最有趣？哪一題最難？','Ví dụ: Màn nào thú vị nhất? Câu nào khó nhất?'],
+ go:['送出回饋','Gửi góp ý'],thx:['謝謝你的回饋！阿安收到了。','Cảm ơn góp ý của bạn! Đội trưởng An đã nhận được.'],star:['顆星','sao']};
 var KNT=['你知道嗎？','Bạn có biết?'],KNH=['點開看','Bấm để xem'];
 var eggKind=null;
 var FULL={e:['滿星通關','Đủ 16 sao'],t:['食安滿分學霸','Học bá ATTP điểm tối đa'],n:['「16 顆星全收！每一道防線你都守住了，阿安想頒獎給你。」','“Bạn đã giành đủ 16 sao! Bạn đã giữ vững mọi tuyến phòng thủ, Đội trưởng An muốn trao giải cho bạn!”']};
@@ -700,6 +715,21 @@ function lbHtml(lb){
   lb.others.forEach(function(d){h+='<div class="lbr'+(d.dept===lb.mine?' me':'')+'"><div class="row1"><div>'+esc(deptName(d.dept))+'</div><div style="font-weight:400;color:var(--mut);font-size:18px">'+esc(d.done?tr('doneN',d.done,d.headcount):tr('noDone'))+'</div></div></div>'});
   h+='</div>';
   return h}
+function fbHtml(){var k=S.lang==='zh'?0:1,f=S.fbForm||(S.fbForm={fun:0,diff:0,note:''});
+  if(S.state&&S.state.fb)return '<div class="panel fbp"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(FBS.thx[k])+'</div></div>';
+  var st='';for(var i=1;i<=5;i++)st+='<button type="button" data-f="'+i+'" aria-label="'+i+' '+FBS.star[k]+'" aria-pressed="'+(f.fun>=i?'true':'false')+'">'+starSvg(f.fun>=i,34,false,0)+'</button>';
+  var df='';for(var j=1;j<=3;j++)df+='<button type="button" data-d="'+j+'" class="'+(f.diff===j?'on':'')+'" aria-pressed="'+(f.diff===j?'true':'false')+'">'+esc(FBS.d[k][j-1])+'</button>';
+  return '<div class="panel fbp" id="fbp"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(FBS.t[k])+'</div><div class="fsub">'+esc(FBS.s[k])+'</div>'
+   +'<div class="fq">'+esc(FBS.q1[k])+'</div><div class="fstars">'+st+'</div>'
+   +'<div class="fq">'+esc(FBS.q2[k])+'</div><div class="fdiff">'+df+'</div>'
+   +'<div class="fq"><label for="fbn">'+esc(FBS.q3[k])+'</label></div><textarea id="fbn" maxlength="100" placeholder="'+esc(FBS.ph[k])+'">'+esc(f.note)+'</textarea><div class="fcnt"><span id="fbc">'+f.note.length+'</span> / 100</div>'
+   +'<div class="btns" style="margin-top:8px"><button type="button" class="btn" id="fbgo"'+(f.fun&&f.diff?'':' disabled')+'>'+esc(FBS.go[k])+'</button></div></div>'}
+function fbWire(){var p=document.getElementById('fbp');if(!p)return;var f=S.fbForm;
+  function ref(){var g=document.getElementById('fbgo');if(g)g.disabled=!(f.fun&&f.diff)}
+  p.querySelectorAll('[data-f]').forEach(function(b){b.onclick=function(){f.fun=Number(b.getAttribute('data-f'));p.querySelectorAll('[data-f]').forEach(function(x){var n=Number(x.getAttribute('data-f'));x.innerHTML=starSvg(f.fun>=n,34,false,0);x.setAttribute('aria-pressed',f.fun>=n?'true':'false')});ref()}});
+  p.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){f.diff=Number(b.getAttribute('data-d'));p.querySelectorAll('[data-d]').forEach(function(x){var on=Number(x.getAttribute('data-d'))===f.diff;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false')});ref()}});
+  var ta=document.getElementById('fbn');ta.oninput=function(){f.note=ta.value;document.getElementById('fbc').textContent=ta.value.length};
+  document.getElementById('fbgo').onclick=function(){if(!(f.fun&&f.diff))return;call({action:'feedback',id:S.key,fun:f.fun,diff:f.diff,note:f.note},function(j){S.state=j.state;sfx('correct');screenFinal();setTimeout(function(){window.scrollTo(0,document.body.scrollHeight)},50)})}}
 function screenFinal(){
   S.render=screenFinal;var st=S.state,full=st.correct>=16,fk=S.lang==='zh'?0:1;if(full&&!S.sfxFull){S.sfxFull=1;sfx('full')}
   show(hdrBrand()+'<div class="wrap"><div class="body dsk"><div class="npcCol'+(full?' fullc':'')+'">'+npc(full?'trophy':'celebrate')+'<div class="beside"><div class="eyebrow">'+(full?esc(FULL.e[fk]):esc(tr('allT1')))+'</div><h1 class="t serif">'+esc(full?FULL.t[fk]:tr('allT2'))+'</h1></div></div><div class="mainCol">'
@@ -708,10 +738,11 @@ function screenFinal(){
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('myBadges'))+'</div><div class="bgrid">'+[1,2,3,4].map(function(i){var m=L(i),l=st.levels[i-1];return '<div class="bgi'+(l.badge?'':' no')+'"><div style="display:flex;justify-content:center"><span class="'+(l.badge?'litpop':'')+'">'+medalIc(l.badge,44)+'</span></div><small>'+m.year+'</small>'+esc(l.badge?z(m.badge):tr('notGot'))+'<div>'+starRow(l.correct,20,true)+'</div></div>'}).join('')+'</div></div>'
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('fourLines'))+'</div>'+[1,2,3,4].map(function(i){return '<div class="take"><b class="serif">'+L(i).year+'</b><span>'+esc(z(L(i).remember))+'</span></div>'}).join('')+'</div>'
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;color:var(--gold)">'+esc(tr('lbT'))+'</div><div style="height:12px"></div><div id="lb">…</div></div>'
+   +fbHtml()
    +'<div class="foot" style="padding-top:14px">'+esc(tr('oneTime'))+'</div>'
    +'<div class="btns"><button class="btn sec" id="rv">'+esc(tr('review4'))+'</button><button class="sw" id="sw">'+esc(tr('switchId'))+'</button></div>'
    +'</div></div></div>',{bg:null});
-  $('#rv').onclick=function(){screenMap()};$('#sw').onclick=function(){logout()};
+  $('#rv').onclick=function(){screenMap()};$('#sw').onclick=function(){logout()};fbWire();
   countUp($('.cu2'),st.score,'');if(!S.finalBurst&&st.levels.some(function(l){return l.badge})){S.finalBurst=1;burst(90)}
   function put(lb){var e=$('#lb');if(e)e.innerHTML=lbHtml(lb)}
   if(S.lbCache)put(S.lbCache);else api({action:'leaderboard',id:S.key}).then(function(j){S.lbCache=j;put(j)}).catch(function(){var e=$('#lb');if(e)e.textContent='—'});
