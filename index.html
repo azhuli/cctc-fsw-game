@@ -501,9 +501,9 @@ function screenStory(na){
   var pe=sb.querySelector('p'),full=pe.textContent,typing=false,ti=null;
   if(!REDUCE&&!na&&!S.noAnim&&full.length>0){typing=true;var k=0;pe.setAttribute('aria-label',full);
     function paint(){pe.innerHTML='<span>'+esc(full.slice(0,k))+'</span><span style="visibility:hidden">'+esc(full.slice(k))+'</span>'}
-    paint();ti=setInterval(function(){k+=1;if(k>=full.length){clearInterval(ti);typing=false;pe.textContent=full}else paint()},40)}
-  function nextPg(){if(typing){clearInterval(ti);typing=false;pe.textContent=full;return}
-    clearInterval(ti);if(S.storyPage<pages.length-1){S.storyPage++;screenStory();var n=$('#sbox');if(n)n.focus()}else screenStoryEnd()}
+    paint();ti=setInterval(function(){k+=1;if(k%3===0)sfx('type');if(k>=full.length){clearInterval(ti);typing=false;pe.textContent=full}else paint()},40)}
+  function nextPg(){if(typing){clearInterval(ti);typing=false;pe.textContent=full;sfx('click');return}
+    clearInterval(ti);sfx('page');if(S.storyPage<pages.length-1){S.storyPage++;screenStory();var n=$('#sbox');if(n)n.focus()}else screenStoryEnd()}
   sb.onclick=nextPg;sb.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();nextPg()}};
   $('#skip').onclick=function(){clearInterval(ti);screenStoryEnd()};
 }
@@ -527,14 +527,19 @@ var SFX={
  correct:function(t){[523.25,659.25,783.99].forEach(function(f,i){sn(f,t+i*0.09,0.32,0.26,'triangle');sn(f*2,t+i*0.09,0.22,0.08,'sine')})},
  wrong:function(t){sn(233,t,0.22,0.3,'triangle',210);sn(175,t+0.17,0.38,0.3,'triangle',155)},
  clear:function(t){var n=[523.25,659.25,783.99,1046.5],d=[0,0.11,0.22,0.36];n.forEach(function(f,i){sn(f,t+d[i],i===3?0.7:0.2,0.26,'triangle');sn(f/2,t+d[i],i===3?0.7:0.2,0.12,'sine')})},
+ page:function(t){sn(720,t,0.1,0.16,'sine',380)},
+ type:function(t){sn(1500+Math.random()*500,t,0.02,0.05,'square')},
+ tap:function(t,i){sn(420+(i||0)*130,t,0.09,0.24,'sine',640+(i||0)*160)},
+ egg:function(t){[784,988,1175,1568].forEach(function(f,i){sn(f,t+i*0.07,0.34,0.2,'triangle');sn(f*2,t+i*0.07,0.2,0.06,'sine')});sn(2349,t+0.3,0.5,0.07,'sine')},
+ idea:function(t){sn(1318.5,t,0.28,0.22,'sine');sn(2637,t,0.18,0.06,'sine');sn(1760,t+0.1,0.45,0.22,'sine');sn(3520,t+0.1,0.25,0.05,'sine')},
  full:function(t){var up=[523.25,659.25,783.99,1046.5,1318.5,1568],i;for(i=0;i<up.length;i++)sn(up[i],t+i*0.085,0.3,0.22,'triangle');
   var t2=t+up.length*0.085+0.05;[523.25,659.25,783.99,1046.5].forEach(function(f){sn(f,t2,1.1,0.17,'triangle');sn(f*2,t2,0.9,0.05,'sine')});for(i=0;i<7;i++)sn(2093+i*210,t2+0.1+i*0.07,0.18,0.06,'sine')}};
-function sfx(n){if(!SND.on)return;try{if(sndInit())SFX[n](SND.ctx.currentTime+0.02)}catch(e){}}
+function sfx(n,a){if(!SND.on)return;try{if(sndInit())SFX[n](SND.ctx.currentTime+0.02,a)}catch(e){}}
 document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.closest)return;var sb=t.closest('.sndb');
   if(sb){SND.on=!SND.on;try{localStorage.setItem('fsw_snd',SND.on?'1':'0')}catch(e){}
     document.querySelectorAll('.sndb').forEach(function(b){b.classList.toggle('on',SND.on);b.setAttribute('aria-pressed',SND.on?'true':'false');b.innerHTML=sndIcon(SND.on)});
     if(SND.on)sfx('click');return}
-  if(t.closest('button,.opt'))sfx('click')},false);
+  if(t.closest('.knchip'))return;if(t.closest('button,.opt'))sfx('click')},false);
 var POLICY={t:['食品安全政策','Chính sách an toàn thực phẩm'],l:[['確保食安無疑','追求品質卓越','落實企業永續'],['Nhằm đảm bảo an toàn thực phẩm không vấn đề','Theo đuổi chất lượng xuất sắc','Thực hiện sự bền vững của doanh nghiệp']],c:['關閉','Đóng']};
 var KN=[null,['塑化劑事件是不肖業者用工業用的 DEHP，取代棕櫚油來製作起雲劑。所以原料不能只看外觀和單據，原料來源與製程查核更重要。','Vụ chất hóa dẻo xảy ra vì một số doanh nghiệp gian lận đã dùng DEHP công nghiệp thay cho dầu cọ để làm chất tạo đục. Vì vậy, kiểm soát nguyên liệu không thể chỉ nhìn bề ngoài và giấy tờ, mà cần kiểm tra nguồn gốc nguyên liệu và quy trình sản xuất.'],
  ['凱氏定氮法測的是「氮」，不是「蛋白質」。三聚氰胺的含氮量約 66%，所以摻進去能讓蛋白質數值看起來變高。','Phương pháp Kjeldahl đo hàm lượng "nitơ" chứ không đo trực tiếp "protein". Melamine chứa khoảng 66% nitơ nên khi bị thêm vào sẽ làm kết quả protein cao giả tạo.'],
@@ -550,9 +555,9 @@ function closePolicy(){eggKind=null;var e=document.getElementById('egg');if(e&&e
 function eggKey(ev){if(ev.key==='Escape')closePolicy()}
 function showKn(lv){if(document.getElementById('egg'))return;eggKind={lv:lv};showPolicy(true)}
 function showPolicy(keep){if(document.getElementById('egg'))return;if(keep!==true)eggKind=null;var e=document.createElement('div');e.id='egg';e.setAttribute('role','dialog');e.setAttribute('aria-modal','true');e.innerHTML='<div class="eggc">'+policyInner()+'</div>';
-  e.onclick=function(ev){if(ev.target===e)closePolicy()};document.body.appendChild(e);var b=document.getElementById('eggx');b.onclick=closePolicy;b.focus();document.addEventListener('keydown',eggKey)}
+  e.onclick=function(ev){if(ev.target===e)closePolicy()};document.body.appendChild(e);sfx(eggKind&&eggKind.lv?'idea':'egg');var b=document.getElementById('eggx');b.onclick=closePolicy;b.focus();document.addEventListener('keydown',eggKey)}
 var eggN=0,eggT=0;
-document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('npc'))return;var now=Date.now();if(now-eggT>1500)eggN=0;eggT=now;eggN++;if(eggN>=3){eggN=0;showPolicy()}},false);
+document.addEventListener('click',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('npc'))return;var now=Date.now();if(now-eggT>1500)eggN=0;eggT=now;eggN++;if(eggN>=3){eggN=0;showPolicy()}else sfx('tap',eggN)},false);
 var MODE={2:['本關玩法：線索偵探。先看 1 條線索，需要時再多看；用的線索越少，加分越多。','Cách chơi: Thám tử manh mối. Xem 1 manh mối trước, cần thì xem thêm; dùng càng ít manh mối, điểm cộng càng cao.'],
  4:['本關前 2 題是「巡檢卡片」：看圖和文字，找出最需要處理的那一張。後 2 題是一般題。','Màn này 2 câu đầu là "thẻ kiểm tra": xem hình và chữ, chọn thẻ cần xử lý nhất. 2 câu sau là câu thông thường.']};
 var CARDIMGS=["cae07a7cc", "cac908c0b", "c558c982a", "c11a1b844", "c6f767adf", "c936d7aa2", "c2c973d92", "ca6ae9d20", "c4769f469", "cc5fbbd0d", "c6a938b62", "cf67d3ae3"];
