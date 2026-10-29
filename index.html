@@ -451,7 +451,7 @@ function errMsg(e){var c=e&&e.code||'SERVER';var k='e_'+c;if(!T[k])k='e_SERVER';
 function call(body,okFn,errFn){busy(true);return api(body).then(function(j){busy(false);S.pr=null;return okFn(j)}).catch(function(e){busy(false);if(S.pr)S.pr();if(errFn&&errFn(e)===true)return;if(e&&e.code==='OUT_OF_SYNC'){loadQuestion();return}
   if(e&&(e.code==='NO_STATE'||e.code==='NOT_FOUND')&&body.action!=='login'){stopTimer();logout(tr('e_RELOGIN'));return}
   toast(errMsg(e))})}
-function logout(msg){stopTimer();ss('fsw_id',null);ss('fsw_ok',null);S.id='';S.key='';S.dept='';S.state=null;S.lbCache=null;S.confirmed=false;screenLogin(msg||'')}
+function logout(msg){stopTimer();S.pre=null;S.preKey=null;S.prePromise=null;ss('fsw_id',null);ss('fsw_ok',null);S.id='';S.key='';S.dept='';S.state=null;S.lbCache=null;S.confirmed=false;screenLogin(msg||'')}
 
 /* ---------- screens ---------- */
 function screenLogin(msg){
@@ -480,7 +480,7 @@ function screenConfirm(){
    +'<div class="btns"><button class="btn" id="yes">'+esc(started?tr('yesCont'):tr('yesStart'))+'</button><button class="btn sec" id="no">'+esc(tr('notMe'))+'</button></div>'
    +'<div class="panel"><div class="serif" style="font-weight:900;font-size:24px;margin-bottom:12px;color:var(--gold)">'+esc(tr('rulesT'))+'</div><div style="display:flex;flex-direction:column;gap:12px">'+rl+'</div></div></div></div>');
   $('#yes').onclick=function(){S.confirmed=true;ss('fsw_ok',S.key);screenMap()};
-  $('#no').onclick=function(){ss('fsw_id',null);ss('fsw_ok',null);S.id='';S.key='';screenLogin()};
+  $('#no').onclick=function(){S.pre=null;S.preKey=null;S.prePromise=null;ss('fsw_id',null);ss('fsw_ok',null);S.id='';S.key='';screenLogin()};
 }
 function cardHtml(i,st,review){
   var m=L(i),lv=S.state.levels[i-1],h;
@@ -620,7 +620,7 @@ function screenIntro(pk){
   S.render=function(){screenIntro(pk)};var m=L(S.level);
   var say=S.lang==='zh'?pk.cbZh:pk.cbVi,prog=tr('qN',pk.i+1)+' / '+pk.n+'　·　'+(pk.type==='s'?tr('sitTag',S.lang==='zh'?pk.roleZh:(pk.labelVi||pk.roleVi)):tr('genTag'));
   show(hdrTitle(esc(tr('lvN',S.level)),m.year+' '+z(m.title))+'<div class="wrap"><div class="dots"><span style="color:#BFE0C4;font-size:18px;font-weight:700">'+esc(prog)+'</span></div><div class="spacer"></div><div class="body dsk"><div class="npcCol" style="justify-content:center">'+npc('explain','lg')+'</div><div class="mainCol" style="align-self:flex-end">'+dlg(say,'',false)+'<div class="btns"><button class="btn" id="goq" style="margin-top:12px;min-height:56px">'+esc(tr('startAns'))+'</button></div></div></div></div>',{bg:m.bg});
-  sfx('intro');var b=$('#goq'),key=S.level+':'+pk.i;
+  sfx('intro');var b=$('#goq'),key=S.key+':'+S.level+':'+pk.i;
   /* 阿安說話的這幾秒，先在背景把題目取回來（不開始計時）；按「開始作答」就能立刻顯示 */
   if(S.preKey!==key){S.preKey=key;S.pre=null;
     S.prePromise=api({action:'question',id:S.key,level:S.level,hold:1}).then(function(j){if(S.preKey===key&&j&&j.q)S.pre=j}).catch(function(){})}
@@ -634,7 +634,7 @@ function screenIntro(pk){
       screenQuestion();startTimer();
       /* 計時從這一刻開始：通知伺服器（背景送出，失敗會再試；真的都失敗時，伺服器會在收到答案時才開始算） */
       (function st(n){api({action:'start',id:S.key,level:S.level,i:j.q.i}).catch(function(e){if(n<2&&e&&(e.code==='NET'||e.code==='SERVER'||e.code==='BUSY'))setTimeout(function(){st(n+1)},1200)})})(0)})};
-  try{b.focus()}catch(e){}
+  try{b.focus({preventScroll:true})}catch(e){}
 }
 function startTimer(){stopTimer();tick();S.timer=setInterval(tick,250)}
 function tick(){
