@@ -437,11 +437,16 @@ var toastT;function toast(msg){var t=$('#toast');t.textContent=msg;t.style.displ
 /* api */
 function api(body){
   if(!API)return Promise.reject({code:'CONFIG'});
+  var T0=Date.now();
   function once(n){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'})
     .then(function(r){return r.json()})
     .catch(function(e){if(n<2)return new Promise(function(res){setTimeout(res,900)}).then(function(){return once(n+1)});throw {code:'NET'}})}
-  return once(0).then(function(j){if(!j||!j.ok){var e=(j&&j.error)||'SERVER';throw {code:e,data:j}}return j})
+  return once(0).then(function(j){dbg(body.action,Date.now()-T0,j);if(!j||!j.ok){var e=(j&&j.error)||'SERVER';throw {code:e,data:j}}return j})
 }
+/* 診斷：網址加 ?dbg=1 時，畫面下方顯示每次請求的耗時（只有自己看得到） */
+var DBG=/[?&]dbg=1/.test(location.search),dbgL=[];
+function dbg(a,tot,j){if(!DBG)return;var el=document.getElementById('dbg');if(!el){el=document.createElement('div');el.id='dbg';el.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,.82);color:#9f9;font:12px/1.4 monospace;padding:4px 8px;pointer-events:none';document.body.appendChild(el)}
+  dbgL.unshift(a+(j&&j.peek?'(peek)':'')+' 總 '+tot+'ms｜伺服器 '+(j&&j._ms!=null?j._ms+'ms(排隊 '+(j._w||0)+')':'?')+'｜網路 '+(j&&j._ms!=null?(tot-j._ms)+'ms':'?'));dbgL=dbgL.slice(0,4);el.innerHTML=dbgL.map(function(x){return esc(x)}).join('<br>')}
 function errMsg(e){var c=e&&e.code||'SERVER';var k='e_'+c;if(!T[k])k='e_SERVER';var m=tr(k);if(c==='NOT_STARTED'&&e.data&&e.data.start)m+=e.data.start;return m}
 function call(body,okFn,errFn){busy(true);return api(body).then(function(j){busy(false);S.pr=null;return okFn(j)}).catch(function(e){busy(false);if(S.pr)S.pr();if(errFn&&errFn(e)===true)return;if(e&&e.code==='OUT_OF_SYNC'){loadQuestion();return}
   if(e&&(e.code==='NO_STATE'||e.code==='NOT_FOUND')&&body.action!=='login'){stopTimer();logout(tr('e_RELOGIN'));return}
