@@ -445,7 +445,7 @@ function api(body){
 }
 /* 診斷：網址加 ?dbg=1 時，畫面下方顯示每次請求的耗時（只有自己看得到） */
 var DBG=/[?&]dbg=1/.test(location.search),dbgL=[];
-function dbg(a,tot,j){if(!DBG)return;var el=document.getElementById('dbg');if(!el){el=document.createElement('div');el.id='dbg';el.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,.82);color:#9f9;font:12px/1.4 monospace;padding:4px 8px;pointer-events:none';document.body.appendChild(el)}
+function dbg(a,tot,j){if(!DBG)return;var el=document.getElementById('dbg');if(!el){el=document.createElement('div');el.id='dbg';el.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99;background:rgba(0,0,0,.82);color:#9f9;font:12px/1.4 monospace;padding:4px 8px;pointer-events:none';document.body.appendChild(el)}
   dbgL.unshift(a+(j&&j.peek?'(peek)':'')+' 總 '+tot+'ms｜伺服器 '+(j&&j._ms!=null?j._ms+'ms(排隊 '+(j._w||0)+')':'?')+'｜網路 '+(j&&j._ms!=null?(tot-j._ms)+'ms':'?'));dbgL=dbgL.slice(0,4);el.innerHTML=dbgL.map(function(x){return esc(x)}).join('<br>')}
 function errMsg(e){var c=e&&e.code||'SERVER';var k='e_'+c;if(!T[k])k='e_SERVER';var m=tr(k);if(c==='NOT_STARTED'&&e.data&&e.data.start)m+=e.data.start;return m}
 function call(body,okFn,errFn){busy(true);return api(body).then(function(j){busy(false);S.pr=null;return okFn(j)}).catch(function(e){busy(false);if(S.pr)S.pr();if(errFn&&errFn(e)===true)return;if(e&&e.code==='OUT_OF_SYNC'){loadQuestion();return}
@@ -602,13 +602,10 @@ function stopTimer(){if(S.timer){clearInterval(S.timer);S.timer=null}redz(0)}
 function loadQuestion(noIntro){
   stopTimer();if(S.level>=3)preloadCards();
   if(!noIntro){
-    /* 先問有沒有阿安的開場白（只讀、不開始計時）；有就先顯示，按「開始作答」才真正取題 */
-    call({action:'question',id:S.key,level:S.level,peek:1},function(j){
-      if(j.state)S.state=j.state;
-      if(j.levelDone){screenMap();return}
-      if(j.intro){screenIntro(j);return}
-      loadQuestion(true)});
-    return}
+    /* 阿安的開場白已經跟著狀態一起送來了：有就先顯示，按「開始作答」才真正取題（不多一次請求） */
+    var lvs=S.state&&S.state.levels&&S.state.levels[S.level-1];
+    if(lvs&&lvs.intro){screenIntro(lvs.intro);return}
+  }
   call({action:'question',id:S.key,level:S.level},function(j){
     S.state=j.state;
     if(j.levelDone){screenMap();return}
@@ -623,7 +620,21 @@ function screenIntro(pk){
   S.render=function(){screenIntro(pk)};var m=L(S.level);
   var say=S.lang==='zh'?pk.cbZh:pk.cbVi,prog=tr('qN',pk.i+1)+' / '+pk.n+'　·　'+(pk.type==='s'?tr('sitTag',S.lang==='zh'?pk.roleZh:(pk.labelVi||pk.roleVi)):tr('genTag'));
   show(hdrTitle(esc(tr('lvN',S.level)),m.year+' '+z(m.title))+'<div class="wrap"><div class="dots"><span style="color:#BFE0C4;font-size:18px;font-weight:700">'+esc(prog)+'</span></div><div class="spacer"></div><div class="body dsk"><div class="npcCol" style="justify-content:center">'+npc('explain','lg')+'</div><div class="mainCol" style="align-self:flex-end">'+dlg(say,'',false)+'<div class="btns"><button class="btn" id="goq" style="margin-top:12px;min-height:56px">'+esc(tr('startAns'))+'</button></div></div></div></div>',{bg:m.bg});
-  sfx('intro');var b=$('#goq');b.onclick=function(){b.disabled=true;loadQuestion(true)};try{b.focus()}catch(e){}
+  sfx('intro');var b=$('#goq'),key=S.level+':'+pk.i;
+  /* 阿安說話的這幾秒，先在背景把題目取回來（不開始計時）；按「開始作答」就能立刻顯示 */
+  if(S.preKey!==key){S.preKey=key;S.pre=null;
+    S.prePromise=api({action:'question',id:S.key,level:S.level,hold:1}).then(function(j){if(S.preKey===key&&j&&j.q)S.pre=j}).catch(function(){})}
+  b.onclick=function(){if(b.disabled)return;pend(b,'載入中…','Đang tải…');
+    (S.prePromise||Promise.resolve()).then(function(){
+      var j=S.pre;if(S.preKey!==key||!j||!j.q||j.hold!==true){S.pr=null;loadQuestion(true);return}
+      S.pre=null;S.preKey=null;S.pr=null;
+      var lvs=j.state&&j.state.levels&&j.state.levels[S.level-1];if(lvs)lvs.intro=null;
+      S.state=j.state;S.q=j.q;S.sel=-1;S.review=false;S.total=j.total||QTIME;S.t0=Date.now();S.rem0=S.total;
+      S.shields=j.shields;S.lvScore=j.score;S.lvCorrect=j.correct||0;
+      screenQuestion();startTimer();
+      /* 計時從這一刻開始：通知伺服器（背景送出，失敗會再試；真的都失敗時，伺服器會在收到答案時才開始算） */
+      (function st(n){api({action:'start',id:S.key,level:S.level,i:j.q.i}).catch(function(e){if(n<2&&e&&(e.code==='NET'||e.code==='SERVER'||e.code==='BUSY'))setTimeout(function(){st(n+1)},1200)})})(0)})};
+  try{b.focus()}catch(e){}
 }
 function startTimer(){stopTimer();tick();S.timer=setInterval(tick,250)}
 function tick(){
